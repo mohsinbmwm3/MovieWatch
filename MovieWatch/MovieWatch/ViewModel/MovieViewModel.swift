@@ -8,7 +8,7 @@
 import UIKit
 
 class MovieViewModel: ViewModel {
-    private let model: MoviesModelElement
+    let model: MoviesModelElement
     
     init(model: MoviesModelElement) {
         self.model = model

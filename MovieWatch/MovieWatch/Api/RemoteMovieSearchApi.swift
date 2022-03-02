@@ -10,7 +10,7 @@ import Foundation
 class RemoteMovieSearchApi: MovieSearchApi {
     private let service: Service
     
-    init(service: Service) {
+    init(service: Service = RemoteService(endPoint: "movies/list")) {
         self.service = service
     }
     

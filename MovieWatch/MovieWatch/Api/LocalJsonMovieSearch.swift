@@ -10,7 +10,7 @@ import Foundation
 class LocalJsonMovieSearch: MovieSearchApi {
     private let service: Service
     
-    init(service: Service) {
+    init(service: Service = LocalJSONService(fileName: "movies")) {
         self.service = service
     }
     

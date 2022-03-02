@@ -22,23 +22,22 @@ class MovieSearchViewController: UITableViewController {
         }
     }
     weak var navDelegate: MovieSearchDelegate?
-    var viewModel = MovieSearchViewModel(api: LocalJsonMovieSearch(service: LocalJSONService(fileName: "movies")))
+    var viewModel = MovieSearchViewModel(api: LocalJsonMovieSearch())
+    
+    var searchCategoriesDatasource: SearchTableViewDatasource<MovieSearchCategories, UITableViewCell>?
+    var valueToMapDatasource: SearchTableViewDatasource<String, UITableViewCell>?
+    var moviesDatasource: SearchTableViewDatasource<MovieViewModel, MovieTableViewCell>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Movies"
         navigationItem.searchController = searchController
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "tableViewCellId")
+        refreshSearchCategoryDatasource()
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        viewModel.fetchMovies { result in
-            switch result {
-            case .success(let viewModel):
-                print(viewModel)
-            case .failure(let error):
-                print(error)
-            }
-        }
+        fetchMovies()
     }
     func action() {
         navDelegate?.navigateToMovieDetails(viewModel: nil)
@@ -46,26 +45,64 @@ class MovieSearchViewController: UITableViewController {
 }
 extension MovieSearchViewController {
     func fetchMovies() {
-        
+        viewModel.fetchMovies { [weak self] result in
+            switch result {
+            case .success:
+                print("")
+            case .failure(let error):
+                self?.alert(message: error.localizedDescription)
+            }
+        }
+    }
+}
+extension MovieSearchViewController {
+    func updateTableViewDatasource(datasource: TableViewDatasource?) {
+        tableView.dataSource = datasource
+        tableView.delegate = datasource
+        tableView.reloadData()
+    }
+    func refreshSearchCategoryDatasource() {
+        if let _ = searchCategoriesDatasource {
+        } else {
+            tableView.register(UITableViewCell.self, forCellReuseIdentifier: "searchCatCellId")
+            searchCategoriesDatasource = SearchTableViewDatasource<MovieSearchCategories, UITableViewCell>(items: MovieSearchCategories.allCases, cellId: "searchCatCellId", configure: { cell, item, indexPath in
+                cell.textLabel?.text = item.rawValue
+            }, selectionHandler: { [weak self] item, indexPath in
+                self?.viewModel.updateSelected(searchCategory: item)
+                self?.refreshMapToValueDatasource()
+            })
+            updateTableViewDatasource(datasource: searchCategoriesDatasource)
+        }
+    }
+    func refreshMapToValueDatasource() {
+        if let _ = valueToMapDatasource {
+            valueToMapDatasource?.updateItems(items: viewModel.allKeys())
+        } else {
+            tableView.register(UITableViewCell.self, forCellReuseIdentifier: "valueCellId")
+            valueToMapDatasource = SearchTableViewDatasource<String, UITableViewCell>(items: viewModel.allKeys(), cellId: "valueCellId", configure: { cell, item, indexPath in
+                cell.textLabel?.text = item
+            }, selectionHandler: { [weak self] item, indexPath in
+                self?.refreshMoviesDatasource(key: item)
+                self?.updateTableViewDatasource(datasource: self?.moviesDatasource)
+            })
+        }
+        updateTableViewDatasource(datasource: valueToMapDatasource)
+    }
+    func refreshMoviesDatasource(key: String) {
+        if let _ = moviesDatasource {
+            moviesDatasource?.updateItems(items: viewModel.allValues(key: key))
+        } else {
+            tableView.register(UINib(nibName: "MovieTableViewCell", bundle: nil), forCellReuseIdentifier: "moviesCellId")
+            moviesDatasource = SearchTableViewDatasource<MovieViewModel, MovieTableViewCell>(items: viewModel.allValues(key: key), cellId: "moviesCellId", configure: { cell, item, indexPath in
+                cell.lblMovieName?.text = item.model.title
+            }, selectionHandler: { item, indexPath in
+                
+            })
+        }
     }
 }
 extension MovieSearchViewController {
     static func instantiate() -> MovieSearchViewController? {
         return UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "movieSearchVC") as? MovieSearchViewController ?? nil
-    }
-}
-
-extension MovieSearchViewController {
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 5
-    }
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 40.0
-    }
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
     }
 }
