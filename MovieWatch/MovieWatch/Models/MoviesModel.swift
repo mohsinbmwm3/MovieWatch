@@ -105,7 +105,7 @@ extension MoviesModelElement {
 }
 
 class Rating: Codable {
-    let source: Source?
+    let source: String?
     let value: String?
 
     enum CodingKeys: String, CodingKey {
@@ -113,7 +113,7 @@ class Rating: Codable {
         case value = "Value"
     }
 
-    init(source: Source?, value: String?) {
+    init(source: String?, value: String?) {
         self.source = source
         self.value = value
     }
@@ -140,12 +140,6 @@ extension Rating {
     func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
         return String(data: try self.jsonData(), encoding: encoding)
     }
-}
-
-enum Source: String, Codable {
-    case internetMovieDatabase = "Internet Movie Database"
-    case metacritic = "Metacritic"
-    case rottenTomatoes = "Rotten Tomatoes"
 }
 enum TypeEnum: String, Codable {
     case movie = "movie"

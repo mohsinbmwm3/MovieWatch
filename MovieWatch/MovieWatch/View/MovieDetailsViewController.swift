@@ -14,28 +14,45 @@ protocol MovieDetailsDelegate: AnyObject {
 class MovieDetailsViewController: UIViewController {
 
     @IBOutlet weak var imgVwPoster: UIImageLoaderView!
-    @IBOutlet weak var lblMovieName: UILabel!
-    @IBOutlet weak var lblDirector: UILabel!
-    @IBOutlet weak var lblActor: UILabel!
-    @IBOutlet weak var lblYear: UILabel!
+    @IBOutlet weak var lblTitle: UILabel!
+    @IBOutlet weak var lblCastAndCrew: UILabel!
+    @IBOutlet weak var lblReleased: UILabel!
+    @IBOutlet weak var lblPlot: UILabel!
     @IBOutlet weak var lblGenre: UILabel!
+    @IBOutlet weak var btnRating: UIButton!
     
     weak var navDelegate: MovieDetailsDelegate?
     var viewModel: MovieViewModelOutput?
+    var ratingActionSheet = UIAlertController(title: "Ratings", message: "Select rating source", preferredStyle: .actionSheet)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        createRatingActionSheet()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         imgVwPoster.loadImageWithUrl(viewModel?.posterUrl())
-        lblMovieName.text = viewModel?.movieDisplayName() ?? "-"
-        lblDirector.text = viewModel?.directorsDisplayString() ?? "-"
-        lblActor.text = viewModel?.actors() ?? "-"
-        lblYear.text = viewModel?.movieReleasedYear() ?? "-"
+        lblTitle.text = viewModel?.movieDisplayName() ?? "-"
+        lblCastAndCrew.text = viewModel?.castAndCrew() ?? "-"
+        lblReleased.text = viewModel?.movieReleasedYear() ?? "-"
         lblGenre.text = viewModel?.genre() ?? "-"
+        lblPlot.text = viewModel?.plot() ?? "-"
+        updateRating(rating: viewModel?.ratings().first)
     }
-    
+    func createRatingActionSheet() {
+        for rating in viewModel?.ratings() ?? [] {
+            ratingActionSheet.addAction(UIAlertAction(title: rating.source, style: .default) { [weak self] action in
+                self?.updateRating(rating: rating)
+            })
+        }
+        ratingActionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+    }
+    func updateRating(rating: Rating?) {
+        btnRating.setTitle((rating?.source ?? "") + " - " + (rating?.value ?? ""), for: .normal)
+    }
+    @IBAction func btnRatingSourceClicked(_ sender: UIButton) {
+        present(ratingActionSheet, animated: true, completion: nil)
+    }
     @IBAction func btnBackClicked(_ sender: UIButton) {
         navDelegate?.navigateBackToMovieSearch()
     }

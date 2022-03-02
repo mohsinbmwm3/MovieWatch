@@ -20,9 +20,8 @@ protocol MovieViewModelOutput: AnyObject {
     func language() -> String
     func posterUrl() -> URL?
     func plot() -> String
-    func rating() -> [Rating]
-    
-//    title, plot, cast & crew, released date, genre and rating
+    func ratings() -> [Rating]
+    func castAndCrew() -> String
 }
 
 class MovieViewModel: ViewModel, MovieViewModelInput, MovieViewModelOutput {
@@ -53,8 +52,11 @@ class MovieViewModel: ViewModel, MovieViewModelInput, MovieViewModelOutput {
     func plot() -> String {
         return "Plot: " + (model.plot ?? "-")
     }
-    func rating() -> [Rating] {
+    func ratings() -> [Rating] {
         return model.ratings ?? []
+    }
+    func castAndCrew() -> String {
+        return "Plot: " + (model.actors ?? "-")
     }
     
     func posterUrl() -> URL? {
