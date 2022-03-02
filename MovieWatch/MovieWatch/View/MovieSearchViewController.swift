@@ -31,14 +31,12 @@ class MovieSearchViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        searchController.searchBar.delegate = self
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "search movies by title/genre/actor/director"
         definesPresentationContext = true
         title = "Movies"
         navigationItem.searchController = searchController
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "tableViewCellId")
         tableView.rowHeight = UITableView.automaticDimension
     }
     override func viewDidAppear(_ animated: Bool) {

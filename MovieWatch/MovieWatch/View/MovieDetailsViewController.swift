@@ -20,6 +20,7 @@ class MovieDetailsViewController: UIViewController {
     @IBOutlet weak var lblPlot: UILabel!
     @IBOutlet weak var lblGenre: UILabel!
     @IBOutlet weak var btnRating: UIButton!
+    @IBOutlet weak var vwRatingBar: RatingView!
     
     weak var navDelegate: MovieDetailsDelegate?
     var viewModel: MovieViewModelOutput?
@@ -37,6 +38,7 @@ class MovieDetailsViewController: UIViewController {
         lblReleased.text = viewModel?.movieReleasedYear() ?? "-"
         lblGenre.text = viewModel?.genre() ?? "-"
         lblPlot.text = viewModel?.plot() ?? "-"
+        
         updateRating(rating: viewModel?.ratings().first)
     }
     func createRatingActionSheet() {
@@ -48,7 +50,9 @@ class MovieDetailsViewController: UIViewController {
         ratingActionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     }
     func updateRating(rating: Rating?) {
-        btnRating.setTitle((rating?.source ?? "") + " - " + (rating?.value ?? ""), for: .normal)
+        guard let _rating = rating else { return }
+        vwRatingBar.value = viewModel?.multiplier(forRatingModel: _rating) ?? 0.0
+        btnRating.setTitle((_rating.source ?? "") + " - " + (_rating.value ?? ""), for: .normal)
     }
     @IBAction func btnRatingSourceClicked(_ sender: UIButton) {
         present(ratingActionSheet, animated: true, completion: nil)

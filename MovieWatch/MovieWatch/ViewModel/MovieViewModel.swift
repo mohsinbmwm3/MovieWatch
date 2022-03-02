@@ -22,6 +22,7 @@ protocol MovieViewModelOutput: AnyObject {
     func plot() -> String
     func ratings() -> [Rating]
     func castAndCrew() -> String
+    func multiplier(forRatingModel: Rating) -> Double
 }
 
 class MovieViewModel: ViewModel, MovieViewModelInput, MovieViewModelOutput {
@@ -57,6 +58,29 @@ class MovieViewModel: ViewModel, MovieViewModelInput, MovieViewModelOutput {
     }
     func castAndCrew() -> String {
         return "Plot: " + (model.actors ?? "-")
+    }
+    func multiplier(forRatingModel: Rating) -> Double {
+        guard let _value = forRatingModel.value else { return 0.0 }
+        if _value.contains("%") {
+            let index = _value.index(_value.startIndex, offsetBy: _value.count - 1)
+            let newVal = String(_value[..<index])
+            if let _douleValue = Double(newVal) {
+                return _douleValue / 100
+            }
+        } else if _value.contains("/100") {
+            let index = _value.index(_value.endIndex, offsetBy: -4)
+            let newVal = String(_value[..<index])
+            if let _douleValue = Double(newVal) {
+                return _douleValue / 100
+            }
+        } else if _value.contains("/10") {
+            let index = _value.index(_value.endIndex, offsetBy: -3)
+            let newVal = String(_value[..<index])
+            if let _douleValue = Double(newVal) {
+                return (_douleValue * 10) / 100
+            }
+        }
+        return 0.0
     }
     
     func posterUrl() -> URL? {
