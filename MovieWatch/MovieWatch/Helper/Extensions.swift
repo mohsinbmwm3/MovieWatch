@@ -16,8 +16,7 @@ extension UIViewController {
         present(alertController, animated: true, completion: nil)
     }
 }
-
-public extension UIColor {
+extension UIColor {
     struct Custom {
         static let darkOrange = UIColor(r: 255, g: 128, b: 0)
         static let lightOrange = UIColor(r: 255, g: 179, b: 102)

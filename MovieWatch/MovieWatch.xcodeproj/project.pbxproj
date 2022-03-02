@@ -102,17 +102,17 @@
 		4A275E6C27CE0A1B00F2CACA /* MovieWatch */ = {
 			isa = PBXGroup;
 			children = (
-				4A275E6D27CE0A1B00F2CACA /* AppDelegate.swift */,
+				4A9BBC4727D0067D004A8C7F /* Core */,
 				4A9BBC2227CE9DBF004A8C7F /* View */,
-				4A275E7627CE0A1D00F2CACA /* Assets.xcassets */,
-				4A275E7827CE0A1D00F2CACA /* LaunchScreen.storyboard */,
-				4A275E7B27CE0A1D00F2CACA /* Info.plist */,
 				4A9BBC2027CE9D9E004A8C7F /* Coordinator */,
 				4A9BBC2127CE9DAA004A8C7F /* ViewModel */,
 				4A9BBC2327CE9DCD004A8C7F /* Models */,
 				4A9BBC1F27CE9D93004A8C7F /* Helper */,
 				4A9BBC2627CE9EEC004A8C7F /* Api */,
 				4A9BBC1E27CE9D87004A8C7F /* Service Manager */,
+				4A275E7627CE0A1D00F2CACA /* Assets.xcassets */,
+				4A275E7827CE0A1D00F2CACA /* LaunchScreen.storyboard */,
+				4A275E7B27CE0A1D00F2CACA /* Info.plist */,
 			);
 			path = MovieWatch;
 			sourceTree = "<group>";
@@ -142,7 +142,6 @@
 		4A9BBC2027CE9D9E004A8C7F /* Coordinator */ = {
 			isa = PBXGroup;
 			children = (
-				4A275E8327CE1D5600F2CACA /* Coordinator.swift */,
 				4A275E8527CE1D9B00F2CACA /* MovieSearchCoordinator.swift */,
 				4A275E8727CE20D900F2CACA /* MovieDetailsCoordinator.swift */,
 			);
@@ -190,6 +189,15 @@
 				4A9BBC2B27CE9FA5004A8C7F /* LocalJsonMovieSearch.swift */,
 			);
 			path = Api;
+			sourceTree = "<group>";
+		};
+		4A9BBC4727D0067D004A8C7F /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4A275E6D27CE0A1B00F2CACA /* AppDelegate.swift */,
+				4A275E8327CE1D5600F2CACA /* Coordinator.swift */,
+			);
+			path = Core;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

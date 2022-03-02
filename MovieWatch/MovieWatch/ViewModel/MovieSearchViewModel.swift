@@ -13,8 +13,6 @@ class MovieSearchViewModel: MovieSearchViewModelInput {
     private var searchCategory = MovieSearchCategories.allCases
     private var movies: [MovieViewModel]
     private var operationalList: [MovieViewModel]
-    private var _isSearching = false
-    private var searchText = ""
     
     private var yearToMovieMap = [String: [MovieViewModel]]()
     private var genreToMovieMap = [String: [MovieViewModel]]()
@@ -137,29 +135,6 @@ extension MovieSearchViewModel: MovieSearchViewModelOutput {
     }
 }
 extension MovieSearchViewModel: MovieSearchViewModelFilterActions {
-    func searchBarTextDidBeginEditing() {
-        _isSearching = true
-    }
-    func searchBarTextDidEndEditing() {
-//        _isSearching = false
-    }
-    func searchBarTextDidChange(searchText: String) {
-        if searchText.isEmpty {
-            _isSearching = false
-            clearFilter()
-        } else {
-            _isSearching = true
-            filter(searchString: searchText)
-        }
-        self.searchText = searchText
-    }
-    func cancelSearch() {
-        clearFilter()
-    }
-    func clearFilter() {
-        resetSearch()
-    }
-    
     @discardableResult
     func filter(searchString: String) -> [MovieViewModel] {
         operationalList = _filter(searchString: searchString)

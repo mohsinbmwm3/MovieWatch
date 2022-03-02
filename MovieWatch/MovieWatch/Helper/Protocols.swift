@@ -11,6 +11,7 @@ protocol MovieSearchViewModelInput {
     init(api: MovieSearchApi)
     func fetchMovies(completion: @escaping (ResultType<MovieSearchViewModel?, ApiError>) -> Void) -> Void
 }
+
 protocol MovieSearchViewModelOutput {
     func numberOfSearchCriteria() -> Int
     func allCategories() -> [MovieSearchCategories]
@@ -26,10 +27,25 @@ protocol MovieSearchViewModelOutput {
     func allValues(key: String) -> [MovieViewModel]
     func value(atIndex: Int, forKey: String) -> MovieViewModel?
 }
+
 protocol MovieSearchViewModelFilterActions {
-    func searchBarTextDidBeginEditing() -> Void
-    func searchBarTextDidEndEditing() -> Void
-    func searchBarTextDidChange(searchText: String) -> Void
-    func clearFilter()  -> Void
     func filter(searchString: String) -> [MovieViewModel]
+}
+
+protocol MovieViewModelInput {
+    init(model: MoviesModelElement)
+}
+
+protocol MovieViewModelOutput: AnyObject {
+    func movieDisplayName() -> String
+    func directorsDisplayString() -> String
+    func movieReleasedYear() -> String
+    func actors() -> String
+    func genre() -> String
+    func language() -> String
+    func posterUrl() -> URL?
+    func plot() -> String
+    func ratings() -> [Rating]
+    func castAndCrew() -> String
+    func multiplier(forRatingModel: Rating) -> Double
 }

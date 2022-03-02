@@ -7,24 +7,6 @@
 
 import UIKit
 
-protocol MovieViewModelInput {
-    init(model: MoviesModelElement)
-}
-
-protocol MovieViewModelOutput: AnyObject {
-    func movieDisplayName() -> String
-    func directorsDisplayString() -> String
-    func movieReleasedYear() -> String
-    func actors() -> String
-    func genre() -> String
-    func language() -> String
-    func posterUrl() -> URL?
-    func plot() -> String
-    func ratings() -> [Rating]
-    func castAndCrew() -> String
-    func multiplier(forRatingModel: Rating) -> Double
-}
-
 class MovieViewModel: ViewModel, MovieViewModelInput, MovieViewModelOutput {
     let model: MoviesModelElement
     
