@@ -9,9 +9,21 @@ import UIKit
 
 class MovieTableViewCell: UITableViewCell {
 
-    @IBOutlet weak var lblMovieName: UILabel!
-    @IBOutlet weak var lblMovieDirector: UILabel!
-    @IBOutlet weak var imgVwPoster: UIImageView!
+    @IBOutlet weak var lblMovieTitle: UILabel!
+    @IBOutlet weak var lblMovieLang: UILabel!
+    @IBOutlet weak var lblMovieYear: UILabel!
+    @IBOutlet weak var imgVwPoster: UIImageLoaderView!
+    
+    var viewModel: MovieViewModelOutput? {
+        didSet {
+            if let _vm = viewModel {
+                imgVwPoster.loadImageWithUrl(_vm.posterUrl())
+                lblMovieTitle.text = _vm.movieDisplayName()
+                lblMovieLang.text = _vm.language()
+                lblMovieYear.text = _vm.movieReleasedYear()
+            }
+        }
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()

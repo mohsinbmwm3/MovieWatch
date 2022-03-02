@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = UINavigationController()
         
-        mainCoordinator = MovieSearchCoordinator(navigationController: window?.rootViewController as! UINavigationController, viewModel: nil)
+        mainCoordinator = MovieSearchCoordinator(navigationController: window?.rootViewController as! UINavigationController, data: nil)
         mainCoordinator?.start()
         
         window?.makeKeyAndVisible()

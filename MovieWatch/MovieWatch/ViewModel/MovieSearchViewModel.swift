@@ -7,23 +7,10 @@
 
 import UIKit
 
-//enum MovieSearchCategories {
-//    case years([String: [MovieViewModel]]?)
-//    case genres([String: [MovieViewModel]]?)
-//    case directors([String: [MovieViewModel]]?)
-//    case actors([String: [MovieViewModel]]?)
-//}
-enum MovieSearchCategories: String, CaseIterable {
-    case years = "Years"
-    case genres = "Genres"
-    case directors = "Directors"
-    case actors = "Actors"
-}
-
-class MovieSearchViewModel: NSObject {
+class MovieSearchViewModel: MovieSearchViewModelInput {
     private let api: MovieSearchApi
     
-    private var searchCriteria = MovieSearchCategories.allCases
+    private var searchCategory = MovieSearchCategories.allCases
     private var movies: [MovieViewModel]
     private var operationalList: [MovieViewModel]
     private var _isSearching = false
@@ -37,13 +24,10 @@ class MovieSearchViewModel: NSObject {
     private var selectedSearchCategory: MovieSearchCategories = .years
     private var _keysForSelectedSearchCategory = [String]()
     
-    init(api: MovieSearchApi) {
+    required init(api: MovieSearchApi) {
         self.api = api
         movies = []
         operationalList = []
-    }
-    func resetSearch() {
-        operationalList = movies
     }
     func fetchMovies(completion: @escaping (ResultType<MovieSearchViewModel?, ApiError>) -> Void) {
         api.fetchMovies { [weak self] (result: ResultType<MoviesModel, ApiError>) in
@@ -86,47 +70,8 @@ class MovieSearchViewModel: NSObject {
             }
         }
     }
-}
-extension MovieSearchViewModel {
-    func searchBarTextDidBeginEditing() {
-        _isSearching = true
-    }
-    func searchBarTextDidEndEditing() {
-        _isSearching = false
-    }
-    func searchBarTextDidChange(searchText: String) {
-        if searchText.isEmpty {
-            _isSearching = false
-        } else {
-            _isSearching = true
-        }
-        self.searchText = searchText
-        cleanUpAndFilter()
-    }
-    func cleanUpAndFilter() {
-        if !_isSearching || searchText.isEmpty {
-            resetSearch()
-        } else {
-            filterArray(searchString: searchText)
-        }
-    }
-    func filterArray(searchString: String) {
-        resetSearch()
-        operationalList = filter(searchString: searchString)
-    }
-    func filter(searchString: String) -> [MovieViewModel] {
-        return operationalList
-    }
-}
-extension MovieSearchViewModel {
-    func numberOfSearchCriteria() -> Int {
-        return searchCriteria.count
-    }
-    func allCategories() -> [MovieSearchCategories] {
-        return searchCriteria
-    }
-    func searchCriteria(atIndex: Int) -> MovieSearchCategories {
-        return allCategories()[atIndex]
+    func resetSearch() {
+        operationalList = movies
     }
     func updateSelected(searchCategory: MovieSearchCategories) {
         self.selectedSearchCategory = searchCategory
@@ -141,9 +86,19 @@ extension MovieSearchViewModel {
         case .actors:
             _keysForSelectedSearchCategory = Array(actorToMovieMap.keys)
         }
+        _keysForSelectedSearchCategory.sort()
     }
 }
-extension MovieSearchViewModel {
+extension MovieSearchViewModel: MovieSearchViewModelOutput {
+    func numberOfSearchCriteria() -> Int {
+        return searchCategory.count
+    }
+    func allCategories() -> [MovieSearchCategories] {
+        return searchCategory
+    }
+    func searchCriteria(atIndex: Int) -> MovieSearchCategories {
+        return allCategories()[atIndex]
+    }
     func mapForSelectedSearchCategory() -> [String: [MovieViewModel]] {
         switch selectedSearchCategory {
         case .years:
@@ -179,5 +134,45 @@ extension MovieSearchViewModel {
             return _values[atIndex]
         }
         return nil
+    }
+}
+extension MovieSearchViewModel: MovieSearchViewModelFilterActions {
+    func searchBarTextDidBeginEditing() {
+        _isSearching = true
+    }
+    func searchBarTextDidEndEditing() {
+//        _isSearching = false
+    }
+    func searchBarTextDidChange(searchText: String) {
+        if searchText.isEmpty {
+            _isSearching = false
+            clearFilter()
+        } else {
+            _isSearching = true
+            filter(searchString: searchText)
+        }
+        self.searchText = searchText
+    }
+    func cancelSearch() {
+        clearFilter()
+    }
+    func clearFilter() {
+        resetSearch()
+    }
+    
+    @discardableResult
+    func filter(searchString: String) -> [MovieViewModel] {
+        operationalList = _filter(searchString: searchString)
+        return operationalList
+    }
+    
+    @discardableResult
+    private func _filter(searchString: String) -> [MovieViewModel] {
+        return movies.filter { movieViewModel in
+            if movieViewModel.movieDisplayName().contains(searchString) || movieViewModel.actors().contains(searchString) || movieViewModel.directorsDisplayString().contains(searchString) || movieViewModel.genre().contains(searchString) {
+                return true
+            }
+            return false
+        }
     }
 }

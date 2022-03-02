@@ -9,18 +9,19 @@ import Foundation
 import UIKit
 
 class MovieSearchCoordinator: Coordinator {
-    var viewModel: ViewModel?
+    var data: AnyObject?
     var childCoordinators: [Coordinator] = []
     unowned let navigationController: UINavigationController
     
-    required init(navigationController: UINavigationController, viewModel: ViewModel?) {
+    required init(navigationController: UINavigationController, data: AnyObject?) {
         self.navigationController = navigationController
-        self.viewModel = viewModel
+        self.data = data
     }
     
     @discardableResult
     func start() -> Bool {
         if let _vc = MovieSearchViewController.instantiate() {
+            _vc.navDelegate = self
             navigationController.viewControllers = [_vc]
             return true
         }
@@ -28,8 +29,8 @@ class MovieSearchCoordinator: Coordinator {
     }
 }
 extension MovieSearchCoordinator: MovieSearchDelegate {
-    func navigateToMovieDetails(viewModel: MovieViewModel?) {
-        let movieDetailsCoordinator = MovieDetailsCoordnator(navigationController: navigationController, viewModel: viewModel)
+    func navigateToMovieDetails(viewModel: MovieViewModelOutput?) {
+        let movieDetailsCoordinator = MovieDetailsCoordnator(navigationController: navigationController, data: viewModel)
         movieDetailsCoordinator.delegate = self
         childCoordinators.append(movieDetailsCoordinator)
         movieDetailsCoordinator.start()

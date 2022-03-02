@@ -8,7 +8,7 @@
 import UIKit
 
 protocol MovieSearchDelegate: AnyObject {
-    func navigateToMovieDetails(viewModel: MovieViewModel?) -> Void
+    func navigateToMovieDetails(viewModel: MovieViewModelOutput?) -> Void
 }
 
 protocol MovieFetchDelegate: AnyObject {
@@ -16,31 +16,43 @@ protocol MovieFetchDelegate: AnyObject {
 }
 
 class MovieSearchViewController: UITableViewController {
-    var searchController = UISearchController() {
-        didSet {
-            searchController.searchBar.placeholder = "search movies by title/genre/actor/director"
-        }
-    }
+    var searchController = UISearchController(searchResultsController: nil)
     weak var navDelegate: MovieSearchDelegate?
     var viewModel = MovieSearchViewModel(api: LocalJsonMovieSearch())
     
     var searchCategoriesDatasource: SearchTableViewDatasource<MovieSearchCategories, UITableViewCell>?
     var valueToMapDatasource: SearchTableViewDatasource<String, UITableViewCell>?
-    var moviesDatasource: SearchTableViewDatasource<MovieViewModel, MovieTableViewCell>?
+    var moviesDatasource: SearchTableViewDatasource<MovieViewModelOutput, MovieTableViewCell>?
+    
+    private var shouldRefreshData = true
+    private var isSearchBarEmpty: Bool {
+        return searchController.searchBar.text?.isEmpty ?? true
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+//        searchController.searchBar.delegate = self
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "search movies by title/genre/actor/director"
+        definesPresentationContext = true
         title = "Movies"
         navigationItem.searchController = searchController
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "tableViewCellId")
-        refreshSearchCategoryDatasource()
+        tableView.rowHeight = UITableView.automaticDimension
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        fetchMovies()
+        if shouldRefreshData {
+            shouldRefreshData = false
+            fetchMovies()
+        }
     }
-    func action() {
-        navDelegate?.navigateToMovieDetails(viewModel: nil)
+}
+extension MovieSearchViewController {
+    @IBAction func btnHomeClicked(_ sender: UIBarButtonItem) {
+        refreshSearchCategoryDatasource()
+        updateTableViewDatasource(datasource: searchCategoriesDatasource)
     }
 }
 extension MovieSearchViewController {
@@ -48,11 +60,24 @@ extension MovieSearchViewController {
         viewModel.fetchMovies { [weak self] result in
             switch result {
             case .success:
-                print("")
+                self?.refreshSearchCategoryDatasource()
             case .failure(let error):
                 self?.alert(message: error.localizedDescription)
             }
         }
+    }
+}
+extension MovieSearchViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        if searchController.searchBar.text?.isEmpty ?? true {
+            refreshSearchCategoryDatasource()
+        } else {
+            filterContentForSearchText(searchController.searchBar.text ?? "")
+        }
+    }
+    func filterContentForSearchText(_ searchText: String) {
+        refreshMoviesDatasource(movies: viewModel.filter(searchString: searchText))
+        updateTableViewDatasource(datasource: moviesDatasource)
     }
 }
 extension MovieSearchViewController {
@@ -71,8 +96,8 @@ extension MovieSearchViewController {
                 self?.viewModel.updateSelected(searchCategory: item)
                 self?.refreshMapToValueDatasource()
             })
-            updateTableViewDatasource(datasource: searchCategoriesDatasource)
         }
+        updateTableViewDatasource(datasource: searchCategoriesDatasource)
     }
     func refreshMapToValueDatasource() {
         if let _ = valueToMapDatasource {
@@ -82,21 +107,21 @@ extension MovieSearchViewController {
             valueToMapDatasource = SearchTableViewDatasource<String, UITableViewCell>(items: viewModel.allKeys(), cellId: "valueCellId", configure: { cell, item, indexPath in
                 cell.textLabel?.text = item
             }, selectionHandler: { [weak self] item, indexPath in
-                self?.refreshMoviesDatasource(key: item)
+                self?.refreshMoviesDatasource(movies: self?.viewModel.allValues(key: item) ?? [])
                 self?.updateTableViewDatasource(datasource: self?.moviesDatasource)
             })
         }
         updateTableViewDatasource(datasource: valueToMapDatasource)
     }
-    func refreshMoviesDatasource(key: String) {
+    func refreshMoviesDatasource(movies: [MovieViewModelOutput]) {
         if let _ = moviesDatasource {
-            moviesDatasource?.updateItems(items: viewModel.allValues(key: key))
+            moviesDatasource?.updateItems(items: movies)
         } else {
             tableView.register(UINib(nibName: "MovieTableViewCell", bundle: nil), forCellReuseIdentifier: "moviesCellId")
-            moviesDatasource = SearchTableViewDatasource<MovieViewModel, MovieTableViewCell>(items: viewModel.allValues(key: key), cellId: "moviesCellId", configure: { cell, item, indexPath in
-                cell.lblMovieName?.text = item.model.title
-            }, selectionHandler: { item, indexPath in
-                
+            moviesDatasource = SearchTableViewDatasource<MovieViewModelOutput, MovieTableViewCell>(items: movies, cellId: "moviesCellId", configure: { cell, item, indexPath in
+                cell.viewModel = item
+            }, selectionHandler: { [weak self] item, indexPath in
+                self?.navDelegate?.navigateToMovieDetails(viewModel: item)
             })
         }
     }

@@ -12,9 +12,9 @@ class ViewModel {}
 
 protocol Coordinator: AnyObject {
     var childCoordinators: [Coordinator] { get set }
-    var viewModel: ViewModel? { get set }
+    var data: AnyObject? { get set }
     
-    init(navigationController: UINavigationController, viewModel: ViewModel?)
+    init(navigationController: UINavigationController, data: AnyObject?)
     
     @discardableResult
     func start() -> Bool

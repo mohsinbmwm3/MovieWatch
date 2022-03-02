@@ -11,22 +11,22 @@ protocol BackToMovieSearchDelegate: AnyObject {
     func navigateBackToMovieSearch(coordinator: MovieDetailsCoordnator) -> Void
 }
 
-class MovieDetailsCoordnator: Coordinator {
+class MovieDetailsCoordnator: Coordinator {    
     var childCoordinators: [Coordinator] = []
     unowned let navigationController: UINavigationController
     weak var delegate: BackToMovieSearchDelegate?
-    weak var viewModel: ViewModel?
+    var data: AnyObject?
     
-    required init(navigationController: UINavigationController, viewModel: ViewModel?) {
+    required init(navigationController: UINavigationController, data: AnyObject?) {
         self.navigationController = navigationController
-        self.viewModel = viewModel
+        self.data = data
     }
     
     @discardableResult
     func start() -> Bool {
-        guard let _vm = viewModel as? MovieViewModel else { return false }
+        guard let _vm = data as? MovieViewModelOutput else { return false }
         if let _vc = MovieDetailsViewController.instantiate(viewModel: _vm) {
-            navigationController.viewControllers = [_vc]
+            navigationController.pushViewController(_vc, animated: true)
             return true
         }
         return false
